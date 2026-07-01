@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <title>Visa Generaattori</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Visa Generaattori</h1>
+
+<div class="controls">
+    <label>Kysymyksiä:</label>
+    <input type="number" id="questionCount" value="10" min="1">
+
+    <button onclick="generateQuiz()">Luo Visa</button>
+</div>
+
+<h2>Kategoriat</h2>
+<div id="categories"></div>
+
+<h2>Alakategoriat</h2>
+<div id="subcategories"></div>
+
+<h2>Vaikeustasot</h2>
+<div id="difficulties"></div>
+
+<hr>
+
+<div id="output"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
