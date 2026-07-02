@@ -3,25 +3,31 @@ body {
     margin: 20px;
 }
 
-.controls {
+.round {
+    border: 1px solid #ccc;
     margin-bottom: 20px;
+    padding: 10px;
 }
 
-label {
-    margin-right: 10px;
+.columns {
+    display: flex;
+    gap: 20px;
 }
 
-#output {
-    margin-top: 20px;
+.column {
+    flex: 1;
+    border: 1px solid #ddd;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .question {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #ccc;
 }
-.grid-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap:20px;
+
+details {
+    margin-top: 10px;
 }
