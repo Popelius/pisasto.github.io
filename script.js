@@ -1,5 +1,22 @@
 let database;
 
+function getDifficultyCount(id) {
+    return database.questions.filter(
+        q => q.difficulty_id === id
+    ).length;
+}
+
+function getCategoryCount(id) {
+    return database.questions.filter(
+        q => q.category_ids.includes(id)
+    ).length;
+}
+
+function getSubcategoryCount(id) {
+    return database.questions.filter(
+        q => q.subcategory_ids.includes(id)
+    ).length;
+}
 async function loadDatabase() {
 
     const response =
@@ -24,6 +41,17 @@ function createRounds() {
                 "roundCount"
             ).value
         );
+    const sortedDifficulties = [...database.difficulties]
+        .filter(d => d.id !== 0)
+        .sort((a, b) => a.name.localeCompare(b.name, "fi"));
+
+    const sortedCategories = [...database.categories]
+        .filter(c => c.id !== 0)
+        .sort((a, b) => a.name.localeCompare(b.name, "fi"));
+
+    const sortedSubcategories = [...database.sub_categories]
+        .filter(s => s.id !== 0)
+        .sort((a, b) => a.name.localeCompare(b.name, "fi"));
 
     for (let round = 1;
          round <= roundCount;
@@ -41,8 +69,7 @@ function createRounds() {
 
                 <div class="column">
                     <h3>Vaikeudet</h3>
-                    ${database.difficulties
-                        .filter(d => d.id !== 0)
+                    ${sortedDifficulties
                         .map(d => `
                             <label>
                                 <input
@@ -50,15 +77,14 @@ function createRounds() {
                                     class="difficulty"
                                     data-round="${round}"
                                     value="${d.id}">
-                                ${d.name}
+                                ${d.name} (${getDifficultyCount(d.id)})
                             </label><br>
                         `).join("")}
                 </div>
 
                 <div class="column">
                     <h3>Kategoriat</h3>
-                    ${database.categories
-                        .filter(c => c.id !== 0)
+                    ${sortedCategories
                         .map(c => `
                             <label>
                                 <input
@@ -66,15 +92,14 @@ function createRounds() {
                                     class="category"
                                     data-round="${round}"
                                     value="${c.id}">
-                                ${c.name}
+                                ${c.name} (${getCategoryCount(c.id)})
                             </label><br>
                         `).join("")}
                 </div>
 
                 <div class="column">
                     <h3>Alakategoriat</h3>
-                    ${database.sub_categories
-                        .filter(s => s.id !== 0)
+                    ${sortedSubcategories
                         .map(s => `
                             <label>
                                 <input
@@ -82,7 +107,7 @@ function createRounds() {
                                     class="subcategory"
                                     data-round="${round}"
                                     value="${s.id}">
-                                ${s.name}
+                                ${s.name} (${getSubcategoryCount(s.id)})
                             </label><br>
                         `).join("")}
                 </div>
