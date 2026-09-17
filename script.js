@@ -1,5 +1,16 @@
 let database;
 
+const DATABASE_FILE = "visa_kysymykset_monivalinnoilla.json";
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
 function getDifficultyCount(id) {
     return database.questions.filter(
         q => q.difficulty_id === id
@@ -18,14 +29,73 @@ function getSubcategoryCount(id) {
     ).length;
 }
 async function loadDatabase() {
+    try {
+        const response = await fetch(DATABASE_FILE);
 
-    const response =
-        await fetch("visa_kysymykset.json");
+        if (!response.ok) {
+            throw new Error(
+                `Tietokannan lataus epäonnistui (${response.status}).`
+            );
+        }
 
-    database =
-        await response.json();
+        database = await response.json();
 
-    createRounds();
+        if (!Array.isArray(database.questions)) {
+            throw new Error("JSON-tiedostosta puuttuu questions-lista.");
+        }
+
+        createRounds();
+    } catch (error) {
+        console.error(error);
+        document.getElementById("output").textContent =
+            `Virhe: ${error.message} Tarkista, että ${DATABASE_FILE} ` +
+            "on samassa kansiossa sivun tiedostojen kanssa.";
+    }
+}
+
+function renderQuestion(question, index) {
+    const isMultipleChoice =
+        question.question_type_id === 2 &&
+        Array.isArray(question.options) &&
+        question.options.length > 0;
+
+    let optionsHtml = "";
+    let answerHtml = escapeHtml(question.answer);
+
+    if (isMultipleChoice) {
+        const shuffledOptions = shuffle([...question.options]);
+        const correctIndex = shuffledOptions.findIndex(option =>
+            option.option_id === question.correct_option_id
+        );
+
+        optionsHtml = `
+            <ol class="answer-options" type="A">
+                ${shuffledOptions.map(option => `
+                    <li>${escapeHtml(option.text)}</li>
+                `).join("")}
+            </ol>
+        `;
+
+        if (correctIndex >= 0) {
+            const correctLetter = String.fromCharCode(65 + correctIndex);
+            answerHtml = `${correctLetter}) ${escapeHtml(
+                shuffledOptions[correctIndex].text
+            )}`;
+        }
+    }
+
+    return `
+        <div class="question">
+            <b>Kysymys ${index + 1}</b>
+            <br><br>
+            ${escapeHtml(question.question)}
+            ${optionsHtml}
+            <details>
+                <summary>Näytä vastaus</summary>
+                ${answerHtml}
+            </details>
+        </div>
+    `;
 }
 
 function createRounds() {
@@ -238,29 +308,10 @@ function generateQuiz() {
             `<h2>KIERROS ${round}</h2>`;
 
         selected.forEach((q, index) => {
-
-            output.innerHTML += `
-                <div class="question">
-
-                    <b>
-                        Kysymys ${index + 1}
-                    </b>
-
-                    <br><br>
-
-                    ${q.question}
-
-                    <details>
-                        <summary>
-                            Näytä vastaus
-                        </summary>
-
-                        ${q.answer}
-
-                    </details>
-
-                </div>
-            `;
+            output.insertAdjacentHTML(
+                "beforeend",
+                renderQuestion(q, index)
+            );
         });
     }
 }
